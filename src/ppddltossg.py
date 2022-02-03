@@ -42,7 +42,7 @@ def checklp(nodes_df, edges_df):
     return lp.value(variables[1]) == 100
 
 
-def main(domain_file, problem_file):
+def main(domain_file, problem_file, max_time=300):
 
     domain = Domain(domain_file)
     problem = Problem(problem_file, domain)
@@ -60,7 +60,7 @@ def main(domain_file, problem_file):
     search = True
     start_time = time()
     last_time = start_time
-    max_time = 300
+    # max_time = 300
     step_update = 1
     diff_tot_n = 0
     goal_reached = 0
