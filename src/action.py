@@ -2,6 +2,7 @@ from fractions import Fraction
 
 from state import intersection
 
+# Class to handle action, takes as input the corresponding text from the domain file
 class Action():
     def __init__(self, text):
 
@@ -14,6 +15,7 @@ class Action():
         for part in splitted:
             if 'action' in part:
                 self.__name = part.split(' ')[1]
+            # save parameters
             elif 'parameters' in part:
                 if part.count('?') == part.count(' - '): 
                     params = part[12:-2].split('?')[1:]
@@ -31,16 +33,20 @@ class Action():
                                 'name': param.strip(),
                                 'type': params[1]
                             })
+            # save preconditions
             elif 'precondition' in part:
                 precons = part[14:-2]
                 if precons[:3] == 'and':
                     precons = precons[5:-1]
+                # split them
                 precons = precons.split(') (')
                 for precon in precons:
                     b = True
+                    # negated condition
                     if precon[:4] == 'not ':
                         b = False
                         precon = precon[5:-1]
+                    # different cases with and without objects
                     if '?' in precon:
                         precon = precon.split(' ?')
                         self.__precons.append({
@@ -53,12 +59,14 @@ class Action():
                             'names': []
                         })
                     self.__precons[-1]['bool'] = b
+            # save effects
             elif 'effect' in part:
                 line = part[8:-1]
-                
+                # if it starts with probabilistic
                 if line[:13] == 'probabilistic':
                     self.__effects['prob'] = True
                     self.__effects['effects'] = self.decodeprobeff(line)
+                # if probabilistic is inside the effects, limited to some of them
                 elif 'probabilistic' in line:
                     self.__effects['prob'] = True
                     self.__effects['effects'] = list()
@@ -107,6 +115,7 @@ class Action():
     def effects(self):
         return self.__effects
 
+    # method to decode probabilistic effects
     def decodeprobeff(self, line):
         result = list()
         line = line[14:]
@@ -133,6 +142,7 @@ class Action():
             result.append((float(prob), encoded_effects))
         return result
 
+    # method to decode deterministic effects
     def decodesimpeff(self, line):
         result = list()
         if line[:3] == 'and':
@@ -169,6 +179,7 @@ class Action():
             result[-1]['bool'] = b
         return result
 
+# return not empty parameters
 def notemptyparam(params):
     result = list()
     for key in params.keys():
@@ -176,6 +187,7 @@ def notemptyparam(params):
             result.append(key)
     return result
 
+# return empty parameters
 def emptyparam(params):
     result = list()
     for key in params.keys():
@@ -183,6 +195,8 @@ def emptyparam(params):
             result.append(key)
     return result
 
+# method to check if one action (in input) is applicable to one state (in input as well)
+# Return one or more combinations of objects that satisfy the preconditions
 def checkaction(action, state):
     _params = [x['name'] for x in action.params]
     params = {x : list() for x in _params}
@@ -324,6 +338,7 @@ def checkaction(action, state):
 
     return params
 
+# check if the goal condition is satisfied in a given state
 def checkgoal(state, goal):
     for value in goal:
         if len(value['objects']) == 0:
@@ -333,6 +348,7 @@ def checkgoal(state, goal):
             return False
     return True
 
+# given an action, a state and a set of (valid) objects, apply the action to the state with them.
 def applyactionbase(action, prev_state, params):
     state_list = prev_state.getlist.copy()
     result = list()
@@ -354,7 +370,9 @@ def applyactionbase(action, prev_state, params):
 
     return result
 
-
+# given an action, a state and a set of (valid) objects, apply the action to the state with them.
+# the only difference with respect to applyactionbase is that this is for probabilistic actions,
+# the output is actually a list because there are more than one state that are generate (because of the multiple outcomes)
 def applyactionprob(action, prev_state, params):
     state_list = prev_state.getlist.copy()
     result = list()

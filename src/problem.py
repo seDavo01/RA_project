@@ -1,5 +1,6 @@
 from domain import Domain
 
+# Class to handle the problem, takes as input the problem file and the domain class (initialized with the related domain file)
 class Problem():
     def __init__(self, 
                  file_name: str, 
@@ -17,13 +18,17 @@ class Problem():
                 if len(line) > 0:
                     if temp_text != '':
                         temp_text += line
+                        # count the parenteses to understand when we have something "ready" to be interpreted
                         if temp_text.count('(') <= temp_text.count(')'):
+                            # save objects
                             if temp_type == 'objects':
                                 text = temp_text[1:-1]
                                 self.__objects = self.encodeobjects(text)
+                            # save initial state
                             elif temp_type == 'init':
                                 text = temp_text[1:-1]
                                 self.__init_state = self.encodeinit(text)
+                            # save goal conditions
                             elif temp_type == 'goal':
                                 text = temp_text[1:-1]
                                 if temp_text.count('(') == temp_text.count(')') - 1:
@@ -35,6 +40,7 @@ class Problem():
                         else:
                             temp_text += ' '
                     else:
+                        # save objects
                         if line[:9] == '(:objects':
                             if line.count('(') == line.count(')'):
                                 line = line[1:-1]
@@ -42,6 +48,7 @@ class Problem():
                             else:
                                 temp_text += line + ' '
                                 temp_type = 'objects'
+                        # save initial state
                         elif line[:6] == '(:init':
                             if line.count('(') == line.count(')'):
                                 line = line[1:]
@@ -49,6 +56,7 @@ class Problem():
                             else:
                                 temp_text += line + ' '
                                 temp_type = 'init'
+                        # save goal conditions
                         elif line[:6] == '(:goal':
                             if line.count('(') <= line.count(')'):
                                 if line.count('(') == line.count(')'):

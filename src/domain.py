@@ -1,5 +1,6 @@
 from action import Action
 
+# Class to handle The domain, takes as input the domain file
 class Domain():
     def __init__(self, file_name):
 
@@ -16,17 +17,22 @@ class Domain():
                 # print(line)
                 line = line.split(';')[0]
                 line = line.strip()
+                # read file
                 if len(line) > 0:
                     if temp_text != '':
                         temp_text += line
+                        # count the parenteses to understand when we have something "ready" to be interpreted
                         if temp_text.count('(') <= temp_text.count(')'):
+                            # save types
                             if temp_type == 'types':
                                 text = temp_text[1:-1]
                                 self.__types = text[7:].split(' ')
+                            # save predicates
                             elif temp_type == 'predicates':
                                 text = temp_text[1:-1]
                                 predicates = text[13:-1].split(') (')
                                 self.encodepredicates(predicates)
+                            # save action
                             elif temp_type == 'action':
                                 text = temp_text[1:-1]
                                 if temp_text.count('(') == temp_text.count(')') - 1:
@@ -37,6 +43,7 @@ class Domain():
                         else:
                             temp_text += ' '
                     else:
+                        # save types
                         if line[:7] == '(:types':
                             if line.count('(') == line.count(')'):
                                 line = line[1:-1]
@@ -44,6 +51,7 @@ class Domain():
                             else:
                                 temp_text += line + ' '
                                 temp_type = 'types'
+                        # save predicates
                         elif line[:12] == '(:predicates':
                             if line.count('(') == line.count(')'):
                                 line = line[1:-1]
@@ -52,6 +60,7 @@ class Domain():
                             else:
                                 temp_text += line + ' '
                                 temp_type = 'predicates'
+                        # save action
                         elif line[:8] == '(:action':
                             temp_text += line + ' '
                             temp_type = 'action'
